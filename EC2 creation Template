@@ -1,0 +1,18 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Template to Create an EC2 instance
+Resources:
+  Myec2instance:
+    Type : AWS::EC2::Instance
+    Properties:
+      ImageId: "ami-02ca28e7c7b8f8be1"
+      InstanceType: "t2.micro"
+      KeyName: "venkykeypair"
+      UserData:
+        Fn::Base64: 
+          !Sub |
+            #!/bin/bash
+            yum update -y
+            yum install -y httpd.x86_64
+            systemctl start httpd.service
+            systemctl enable httpd.service
+            echo ?Hello World from $(hostname -f)? > /var/www/html/index.html
