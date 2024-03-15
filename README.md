@@ -1,4 +1,4 @@
-#A virtual network in the AWS cloud
+A virtual network in the AWS cloud
 When you provision a service within a public cloud, it is effectively open to the world and can be at risk of attacks from the internet. In order to secure resources against attacks from the outside, you lock them within a VPC. VPC restricts what sort of traffic, IP addresses and also the users that can access your resources. In other words, VPC is your network but in the cloud.
 
 Just to be clear, AWS has already created a default VPC for you to use so that you don't have to create and configure your own VPC. But, by default its subnet in each AZ is a public subnet, because the main route table sends the subnet's traffic that is destined for the internet to the internet gateway.
@@ -14,11 +14,9 @@ two custom route tables for each of private subnets
 two private subnets spread across two AZs
 At the end we will get the following architecture:
 
-Alt Text
-
 Let’s get started!
 
-Step 1. Create VPC and Internet Gateway
+# Step 1. Create VPC and Internet Gateway
 Firstly, we start by creating a VPC with a size /16 IPv4 CIDR block. This provides up to 65,536 private IPv4 addresses. We might hard code the CIDR block for VPC but it’s better to define it as an input parameter so a user can either customize the IP ranges or use a default value.
 Parameters:
   paramVpcCIDR:
