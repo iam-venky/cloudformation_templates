@@ -77,26 +77,22 @@ Thus, we need an Elastic IP (EIP) address and a NAT gateway. Not even one, but t
 In the sample above, we created and specified an Elastic IP address to associate with the NAT gateway for each AZ. After creating a NAT gateway, we created and updated the route table associated with each private subnet to point internet-bound traffic to the NAT gateway. This enables instances in our private subnets to communicate with the internet.
 
 And our final step is to create two private subnets with a size /24 IPv4 CIDR block in each of two AZs. And then associate the private route table with the private subnet for each AZ.
+
 ![image](https://github.com/iam-venky/cloudformation_templates/assets/160997274/e53ef051-7a71-43f9-b301-89b6fad5dd78)
 
 Optionally, we can add an Output section to get the list of newly created private and public subnets
+
 ![image](https://github.com/iam-venky/cloudformation_templates/assets/160997274/ce7d8aba-6182-4543-aefe-114ac852a8bf)
 
 
 Below, we see our AWS CloudFormation stack with the list of newly created resources:
 
-Alt Text
-
 If you need to understand how to create a stack in AWS Console, please see Part 1 of this series.
 
 Look! We have a stack. At the end we got four subnets, including two public and two private within a newly created VPC:
 
-Alt Text
-
 Summary
 If you made it all the way to the end, congrats, and happy CloudFormation construction!
-
-Alt Text
 
 Our VPC template allows to create two public and two private subnets, in different AZs for redundancy using AWS CloudFormation. It builds a private networking environment in which you can securely run AWS resources, along with related networking resources.
 
