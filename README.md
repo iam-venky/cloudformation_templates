@@ -77,7 +77,6 @@ Thus, we need an Elastic IP (EIP) address and a NAT gateway. Not even one, but t
 In the sample above, we created and specified an Elastic IP address to associate with the NAT gateway for each AZ. After creating a NAT gateway, we created and updated the route table associated with each private subnet to point internet-bound traffic to the NAT gateway. This enables instances in our private subnets to communicate with the internet.
 
 And our final step is to create two private subnets with a size /24 IPv4 CIDR block in each of two AZs. And then associate the private route table with the private subnet for each AZ.
-Parameters:
 ![image](https://github.com/iam-venky/cloudformation_templates/assets/160997274/e53ef051-7a71-43f9-b301-89b6fad5dd78)
 
 Optionally, we can add an Output section to get the list of newly created private and public subnets
