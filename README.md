@@ -18,40 +18,19 @@ Let’s get started!
 
 # Step 1. Create VPC and Internet Gateway
 Firstly, we start by creating a VPC with a size /16 IPv4 CIDR block. This provides up to 65,536 private IPv4 addresses. We might hard code the CIDR block for VPC but it’s better to define it as an input parameter so a user can either customize the IP ranges or use a default value.
-Parameters:
-  paramVpcCIDR:
-    Description: Enter the IP range (CIDR notation) for VPC
-    Type: String
-    Default: 10.192.0.0/16
-Resources:
-  # a) Create a VPC
-  myVPC:
-    Type: AWS::EC2::VPC
-    Properties:
-      CidrBlock: !Ref paramVpcCIDR
-      EnableDnsSupport: true
-      EnableDnsHostnames: true
-      Tags:
-      - Key: CloudFormationLab
-        Value:  !Ref paramUniqueName
+![image](https://github.com/iam-venky/cloudformation_templates/assets/160997274/633407a1-5016-45d4-bff7-58c3df8225d0)
+
 CidrBlock - the IP address range available to our VPC
 EnableDnsSupport - if set to true, AWS will resolve DNS hostnames to any instance within the VPC’s IP address
 EnableDnsHostnames - if set to true, instances get allocated DNS hostnames by default
 Secondly, we need to create an Internet Gateway. An Internet Gateway is a logical connection between a VPC and the Internet. If there is no Internet Gateway, then there is no connection between the VPC and the Internet.
   # b) Create a Internet Gateway
-  myInternetGateway:
-    Type: AWS::EC2::InternetGateway
-    Properties:
-      Tags:
-      - Key: CloudFormationLab
-        Value:  !Ref paramUniqueName
+![image](https://github.com/iam-venky/cloudformation_templates/assets/160997274/eb4f6b2d-f6f5-46d5-bc15-3d053bd30d84)
+
 And finally, let’s attach the Internet Gateway to the VPC
   # c) Attach the Internet Gateway to the VPC
-  myVPCGatewayAttachment:
-    Type: AWS::EC2::VPCGatewayAttachment
-    Properties:
-      VpcId: !Ref myVPC
-      InternetGatewayId: !Ref myInternetGateway
+![image](https://github.com/iam-venky/cloudformation_templates/assets/160997274/7c181434-8aeb-43dc-9f43-e6df55cc805e)
+
 With that, we have already built a very basic VPC.
 
 Step 2. Create a public route table and public subnets across two AZs
@@ -59,22 +38,13 @@ Placing our instances in multiple AZs increase the availability of our resources
 
 Firstly, let’s create a custom route table for all public subnets and name it public route table. We need it to control the routing for the public subnets which we are about to create.
   # a) Create a public route table for the VPC (will be public once it is associated with the Internet Gateway)
-  myPublicRouteTable:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref myVPC
-      Tags:
-        - Key: Name
-          Value: !Ref paramUniqueName
+![image](https://github.com/iam-venky/cloudformation_templates/assets/160997274/da2d602f-e2c3-4de3-b856-2798a92509d5)
+
+
 Secondly, we need to add a new route to the public route table that points all traffic (0.0.0.0/0) to the Internet Gateway.
   # b) Associate the public route table with the Internet Gateway
-  myPublicRoute:
-    Type: AWS::EC2::Route
-    DependsOn: myVPCGatewayAttachment
-    Properties:
-      RouteTableId: !Ref myPublicRouteTable
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref myInternetGateway
+![image](https://github.com/iam-venky/cloudformation_templates/assets/160997274/3708c9a3-c462-4843-9a3c-12337b55b529)
+
 DestinationCidrBlock - it specifies which traffic we want this route to be applied to. In this case, we apply it to all traffic using the 0.0.0.0/0 CIDR block
 GatewayId - it specifies where traffic matching the CIDR block should be directed
 Note, when you add a DependsOn attribute to a resource, that resource is created only after the creation of the resource specified in the DependsOn attribute.
@@ -82,56 +52,18 @@ Note, when you add a DependsOn attribute to a resource, that resource is created
 Thirdly, once we are done with the public route table, time to create two public subnets with a size /24 IPv4 CIDR block in each of two AZs. This provides up to 256 addresses per subnet, a few of which are reserved for AWS use.
 
 It’s better to define CIDR blocks for both subnets as input parameters so a user can either customize the IP ranges or use a default range.
-Parameters:
-  # etc
-  paramPublicSubnet1CIDR:
-    Description: Enter the IP range (CIDR notation)  for the public subnet in AZ A
-    Type: String
-    Default: 10.192.10.0/24
-  paramPublicSubnet2CIDR:
-    Description: Enter the IP range (CIDR notation)  for the public subnet in AZ B
-    Type: String
-    Default: 10.192.11.0/24
+![image](https://github.com/iam-venky/cloudformation_templates/assets/160997274/07904a93-924d-401d-b55f-fde67439f80c)
+
 Important! The CIDR blocks of two subnets must not overlap with the CIDR block that's associated with the VPC.
 
 Subnets must exist within a VPC, so this is how we associate these two subnets within our VPC:
-   # c) Create a public subnet in AZ 1 (will be public once it is associated with public route table)
-  myPublicSubnet1:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref myVPC
-      AvailabilityZone: !Select [ 0, !GetAZs '' ] # AZ 1
-      CidrBlock: !Ref paramPublicSubnet1CIDR
-      MapPublicIpOnLaunch: true
-      Tags:
-        - Key: Name
-          Value: !Ref paramUniqueName
-  # Create a public subnet in AZ 2 (will be public once it is associated with public route table)
-  myPublicSubnet2:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref myVPC
-      AvailabilityZone: !Select [ 1, !GetAZs  '' ] # AZ 2
-      CidrBlock: !Ref paramPublicSubnet2CIDR
-      MapPublicIpOnLaunch: true
-      Tags:
-        - Key: Name
-          Value: !Ref paramUniqueName
+  ![image](https://github.com/iam-venky/cloudformation_templates/assets/160997274/19ec716a-05fb-451e-8f82-02fe54ab5634)
+
 By setting MapPublicIpOnLaunch to true instances launched into the subnet will be allocated a public IP address by default. This means that any instances in this subnet will be reachable from the Internet via the Internet Gateway attached to the VPC.
 
 And finally, it’s important to associate the route table with both public subnets:
-  # d) Associate the public route table with the public subnet in AZ 1
-  myPublicSubnet1RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref myPublicRouteTable
-      SubnetId: !Ref myPublicSubnet1
-  # Associate the public route table with the public subnet in AZ 2
-  myPublicSubnet2RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref myPublicRouteTable
-      SubnetId: !Ref myPublicSubnet2
+  ![image](https://github.com/iam-venky/cloudformation_templates/assets/160997274/69ed9620-d235-4fdf-8a88-ae88de883b72)
+
 At that point, we are done with public subnets, now let’s create private subnets
 
 Step 3. Create NAT Gateways, private route tables and private subnets across two AZs
@@ -140,125 +72,17 @@ We don't want instances within our private subnets to be reachable from the publ
 NAT gateway enables instances in a private subnet to connect to the internet or other AWS services, but prevent the internet from initiating a connection with those instances. It will have a public IP address and will be associated with a public subnet. Private instances in private subnets will be able to use this to initiate outbound connections. But the NAT will not allow the reverse, a party on the public internet cannot use the NAT to connect to our private instances.
 
 Thus, we need an Elastic IP (EIP) address and a NAT gateway. Not even one, but two! Because a single NAT Gateway in a single AZ has redundancy within that AZ only, so if there are any zonal issues then instances in other AZs would have no route to the internet. To remain highly available, we need a NAT Gateway in each AZ and a different route table for each AZ.
-# a) Specify an Elastic IP (EIP) address for a NAT Gateway in AZ 1
-  myEIPforNatGateway1:
-    Type: AWS::EC2::EIP
-    DependsOn: myVPCGatewayAttachment
-    Properties:
-      Domain: vpc
-  # Specify an Elastic IP (EIP) address for a NAT Gateway in AZ 2
-  myEIPforNatGateway2:
-    Type: AWS::EC2::EIP
-    DependsOn: myVPCGatewayAttachment
-    Properties:
-      Domain: vpc
+![image](https://github.com/iam-venky/cloudformation_templates/assets/160997274/9b8709e7-08b1-4a47-a231-f660e0066919)
 
-  # b) Create a NAT Gateway in the public subnet for AZ 1
-  myNatGateway1:
-    Type: AWS::EC2::NatGateway
-    Properties:
-      AllocationId: !GetAtt myEIPforNatGateway1.AllocationId
-      SubnetId: !Ref myPublicSubnet1
-   # Create a NAT Gateway in the public subnet for AZ 2
-  myNatGateway2:
-    Type: AWS::EC2::NatGateway
-    Properties:
-      AllocationId: !GetAtt myEIPforNatGateway2.AllocationId
-      SubnetId: !Ref myPublicSubnet2
-
-  # c) Create a private route table for AZ 1
-  myPrivateRouteTable1:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref myVPC
-      Tags:
-        - Key: Name
-          Value: !Ref paramUniqueName
-  # Create a private route table for AZ 2
-  myPrivateRouteTable2:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref myVPC
-      Tags:
-        - Key: Name
-          Value: !Ref paramUniqueName
-
-  # d) Associate the private route table with the Nat Gateway in AZ 1
-  myPrivateRouteForAz1:
-    Type: AWS::EC2::Route
-    DependsOn: myVPCGatewayAttachment
-    Properties:
-      RouteTableId: !Ref myPrivateRouteTable1
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref myNatGateway1       
-  #  Associate the private route table with the Nat Gateway in AZ 2
-  myPrivateRouteForAz2:
-    Type: AWS::EC2::Route
-    DependsOn: myVPCGatewayAttachment
-    Properties:
-      RouteTableId: !Ref myPrivateRouteTable2
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref myNatGateway2
 In the sample above, we created and specified an Elastic IP address to associate with the NAT gateway for each AZ. After creating a NAT gateway, we created and updated the route table associated with each private subnet to point internet-bound traffic to the NAT gateway. This enables instances in our private subnets to communicate with the internet.
 
 And our final step is to create two private subnets with a size /24 IPv4 CIDR block in each of two AZs. And then associate the private route table with the private subnet for each AZ.
 Parameters:
-  # etc
-  paramPrivateSubnet1CIDR:
-    Description: Enter the IP range (CIDR notation)  for the private subnet in AZ A
-    Type: String
-    Default: 10.192.20.0/24
-  paramPrivateSubnet2CIDR:
-    Description: Enter the IP range (CIDR notation)  for the private subnet in AZ B
-    Type: String
-    Default: 10.192.21.0/24
-  # e) Create a private subnet in AZ 1
-  myPrivateSubnet1:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref myVPC
-      AvailabilityZone: !Select [ 0, !GetAZs '' ] # AZ 1
-      CidrBlock: !Ref paramPrivateSubnet1CIDR
-      MapPublicIpOnLaunch: true
-      Tags:
-        - Key: Name
-          Value: !Ref paramUniqueName
-  # Create a private subnet in AZ 2
-  myPrivateSubnet2:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref myVPC
-      AvailabilityZone: !Select [ 1, !GetAZs  '' ] # AZ 2
-      CidrBlock: !Ref paramPrivateSubnet2CIDR
-      MapPublicIpOnLaunch: true
-      Tags:
-        - Key: Name
-          Value: !Ref paramUniqueName
+![image](https://github.com/iam-venky/cloudformation_templates/assets/160997274/e53ef051-7a71-43f9-b301-89b6fad5dd78)
 
-  # f) Associate the private route table with the private subnet in AZ 1
-  myPrivateSubnet1RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref myPrivateRouteTable1
-      SubnetId: !Ref myPrivateSubnet1
-  #  Associate the private route table with the private subnet in AZ 2
-  myPrivateSubnet2RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref myPrivateRouteTable2
-      SubnetId: !Ref myPrivateSubnet2
 Optionally, we can add an Output section to get the list of newly created private and public subnets
-Outputs:
-  outputVPC:
-    Description: A reference to the created VPC
-    Value: !Ref myVPC
-  outputPublicSubnets:
-    Description: A list of the public subnets
-    Value: !Join [ ",", [ !Ref myPublicSubnet1, !Ref myPublicSubnet2 ]]
-  outputPrivateSubnets:
-    Description: A list of the private subnets
-    Value: !Join [ ",", [ !Ref myPrivateSubnet1, !Ref myPrivateSubnet2 ]]
-Here's the GitHub link to the whole template.
+![image](https://github.com/iam-venky/cloudformation_templates/assets/160997274/ce7d8aba-6182-4543-aefe-114ac852a8bf)
+
 
 Below, we see our AWS CloudFormation stack with the list of newly created resources:
 
