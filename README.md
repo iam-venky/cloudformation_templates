@@ -20,9 +20,12 @@ Let’s get started!
 Firstly, we start by creating a VPC with a size /16 IPv4 CIDR block. This provides up to 65,536 private IPv4 addresses. We might hard code the CIDR block for VPC but it’s better to define it as an input parameter so a user can either customize the IP ranges or use a default value.
 ![image](https://github.com/iam-venky/cloudformation_templates/assets/160997274/633407a1-5016-45d4-bff7-58c3df8225d0)
 
-CidrBlock - the IP address range available to our VPC
-EnableDnsSupport - if set to true, AWS will resolve DNS hostnames to any instance within the VPC’s IP address
-EnableDnsHostnames - if set to true, instances get allocated DNS hostnames by default
+CidrBlock - the IP address range available to our VPC.
+
+EnableDnsSupport - if set to true, AWS will resolve DNS hostnames to any instance within the VPC’s IP address.
+
+EnableDnsHostnames - if set to true, instances get allocated DNS hostnames by default.
+
 Secondly, we need to create an Internet Gateway. An Internet Gateway is a logical connection between a VPC and the Internet. If there is no Internet Gateway, then there is no connection between the VPC and the Internet.
   # b) Create a Internet Gateway
 ![image](https://github.com/iam-venky/cloudformation_templates/assets/160997274/eb4f6b2d-f6f5-46d5-bc15-3d053bd30d84)
@@ -45,8 +48,10 @@ Secondly, we need to add a new route to the public route table that points all t
   # b) Associate the public route table with the Internet Gateway
 ![image](https://github.com/iam-venky/cloudformation_templates/assets/160997274/3708c9a3-c462-4843-9a3c-12337b55b529)
 
-DestinationCidrBlock - it specifies which traffic we want this route to be applied to. In this case, we apply it to all traffic using the 0.0.0.0/0 CIDR block
-GatewayId - it specifies where traffic matching the CIDR block should be directed
+DestinationCidrBlock - it specifies which traffic we want this route to be applied to. In this case, we apply it to all traffic using the 0.0.0.0/0 CIDR block.
+
+GatewayId - it specifies where traffic matching the CIDR block should be directed.
+
 Note, when you add a DependsOn attribute to a resource, that resource is created only after the creation of the resource specified in the DependsOn attribute.
 
 Thirdly, once we are done with the public route table, time to create two public subnets with a size /24 IPv4 CIDR block in each of two AZs. This provides up to 256 addresses per subnet, a few of which are reserved for AWS use.
